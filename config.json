@@ -1,0 +1,11 @@
+{   
+    "name" : "experiment 1",
+    "experiments_dir" : "experiments",
+    "skip_dirs" : [],
+    "verbose" : 1,
+    "ghost" : false,
+    "tensorboard":true,
+
+    "config" : {
+    }
+}
