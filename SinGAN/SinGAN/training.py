@@ -1,12 +1,12 @@
-import SinGAN.functions as functions
-import SinGAN.models as models
+from . import functions
+from . import models
 import os
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 import math
 import matplotlib.pyplot as plt
-from SinGAN.imresize import imresize
+from .imresize import imresize
 
 def train(opt,Gs,Zs,reals,NoiseAmp):
     real_ = functions.read_image(opt)
@@ -21,20 +21,20 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
         opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(scale_num / 4)), 128)
 
         opt.out_ = functions.generate_dir2save(opt)
-        opt.outf = '%s/%d' % (opt.out_,scale_num)
+        opt.outf = os.path.join(opt.out_,"{}".format(scale_num))
         try:
             os.makedirs(opt.outf)
         except OSError:
                 pass
 
-        #plt.imsave('%s/in.png' %  (opt.out_), functions.convert_image_np(real), vmin=0, vmax=1)
-        #plt.imsave('%s/original.png' %  (opt.out_), functions.convert_image_np(real_), vmin=0, vmax=1)
-        plt.imsave('%s/real_scale.png' %  (opt.outf), functions.convert_image_np(reals[scale_num]), vmin=0, vmax=1)
+        plt.imsave(os.path.join(opt.out_,'in.png'), functions.convert_image_np(real), vmin=0, vmax=1)
+        plt.imsave(os.path.join(opt.out_,'original.png'), functions.convert_image_np(real_), vmin=0, vmax=1)
+        plt.imsave(os.path.join(opt.outf,'real_scale.png'), functions.convert_image_np(reals[scale_num]), vmin=0, vmax=1)
 
         D_curr,G_curr = init_models(opt)
         if (nfc_prev==opt.nfc):
-            G_curr.load_state_dict(torch.load('%s/%d/netG.pth' % (opt.out_,scale_num-1)))
-            D_curr.load_state_dict(torch.load('%s/%d/netD.pth' % (opt.out_,scale_num-1)))
+            G_curr.load_state_dict(torch.load(os.path.join(opt.out_,"{}".format(scale_num-1),"netG.pth")))
+            D_curr.load_state_dict(torch.load(os.path.join(opt.out_,"{}".format(scale_num-1),"netD.pth")))
 
         z_curr,in_s,G_curr = train_single_scale(D_curr,G_curr,reals,Gs,Zs,in_s,NoiseAmp,opt)
 
@@ -47,10 +47,10 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
         Zs.append(z_curr)
         NoiseAmp.append(opt.noise_amp)
 
-        torch.save(Zs, '%s/Zs.pth' % (opt.out_))
-        torch.save(Gs, '%s/Gs.pth' % (opt.out_))
-        torch.save(reals, '%s/reals.pth' % (opt.out_))
-        torch.save(NoiseAmp, '%s/NoiseAmp.pth' % (opt.out_))
+        torch.save(Zs, os.path.join(opt.out_,"Zs.pth"))
+        torch.save(Gs, os.path.join(opt.out_,"Gs.pth"))
+        torch.save(reals, os.path.join(opt.out_,"reals.pth"))
+        torch.save(NoiseAmp, os.path.join(opt.out_,"NoiseAmp.pth"))
 
         scale_num+=1
         nfc_prev = opt.nfc
@@ -145,7 +145,7 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
 
             if opt.mode == 'paint_train':
                 prev = functions.quant2centers(prev,centers)
-                plt.imsave('%s/prev.png' % (opt.outf), functions.convert_image_np(prev), vmin=0, vmax=1)
+                plt.imsave(os.path.join(opt.outf,'prev.png'), functions.convert_image_np(prev), vmin=0, vmax=1)
 
             if (Gs == []) & (opt.mode != 'SR_train'):
                 noise = noise_
@@ -180,7 +180,7 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
                 loss = nn.MSELoss()
                 if opt.mode == 'paint_train':
                     z_prev = functions.quant2centers(z_prev, centers)
-                    plt.imsave('%s/z_prev.png' % (opt.outf), functions.convert_image_np(z_prev), vmin=0, vmax=1)
+                    plt.imsave(os.path.join(opt.outf,'z_prev.png'), functions.convert_image_np(z_prev), vmin=0, vmax=1)
                 Z_opt = opt.noise_amp*z_opt+z_prev
                 rec_loss = alpha*loss(netG(Z_opt.detach(),z_prev),real)
                 rec_loss.backward(retain_graph=True)
@@ -200,8 +200,8 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
             print('scale %d:[%d/%d]' % (len(Gs), epoch, opt.niter))
 
         if epoch % 500 == 0 or epoch == (opt.niter-1):
-            plt.imsave('%s/fake_sample.png' %  (opt.outf), functions.convert_image_np(fake.detach()), vmin=0, vmax=1)
-            plt.imsave('%s/G(z_opt).png'    % (opt.outf),  functions.convert_image_np(netG(Z_opt.detach(), z_prev).detach()), vmin=0, vmax=1)
+            plt.imsave(os.path.join(opt.outf,'fake_sample.png'), functions.convert_image_np(fake.detach()), vmin=0, vmax=1)
+            plt.imsave(os.path.join(opt.outf,'G(z_opt).png'),  functions.convert_image_np(netG(Z_opt.detach(), z_prev).detach()), vmin=0, vmax=1)
             #plt.imsave('%s/D_fake.png'   % (opt.outf), functions.convert_image_np(D_fake_map))
             #plt.imsave('%s/D_real.png'   % (opt.outf), functions.convert_image_np(D_real_map))
             #plt.imsave('%s/z_opt.png'    % (opt.outf), functions.convert_image_np(z_opt.detach()), vmin=0, vmax=1)
@@ -210,7 +210,7 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
             #plt.imsave('%s/z_prev.png'   % (opt.outf), functions.convert_image_np(z_prev), vmin=0, vmax=1)
 
 
-            torch.save(z_opt, '%s/z_opt.pth' % (opt.outf))
+            torch.save(z_opt, os.path.join(opt.outf,'z_opt.pth'))
 
         schedulerD.step()
         schedulerG.step()
@@ -219,6 +219,10 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
     return z_opt,in_s,netG    
 
 def draw_concat(Gs,Zs,reals,NoiseAmp,in_s,mode,m_noise,m_image,opt):
+    '''
+    What does this do ?? Generate a sample generated image by passing through each generator. In_s is the starting point, shape of 1....!
+    The real images are only used for reshaping.
+    '''
     G_z = in_s
     if len(Gs) > 0:
         if mode == 'rand':
@@ -269,15 +273,15 @@ def train_paint(opt,Gs,Zs,reals,NoiseAmp,centers,paint_inject_scale):
             opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(scale_num / 4)), 128)
 
             opt.out_ = functions.generate_dir2save(opt)
-            opt.outf = '%s/%d' % (opt.out_,scale_num)
+            opt.outf = os.path.join(opt.out_,scale_num)
             try:
                 os.makedirs(opt.outf)
             except OSError:
                     pass
 
-            #plt.imsave('%s/in.png' %  (opt.out_), functions.convert_image_np(real), vmin=0, vmax=1)
-            #plt.imsave('%s/original.png' %  (opt.out_), functions.convert_image_np(real_), vmin=0, vmax=1)
-            plt.imsave('%s/in_scale.png' %  (opt.outf), functions.convert_image_np(reals[scale_num]), vmin=0, vmax=1)
+            # plt.imsave(os.path.join(opt.out_,'in.png'), functions.convert_image_np(real), vmin=0, vmax=1)
+            # plt.imsave(os.path.join(opt.out_,'original.png'), functions.convert_image_np(real_), vmin=0, vmax=1)
+            plt.imsave(os.path.join(opt.out_,'in_scale.png'), functions.convert_image_np(reals[scale_num]), vmin=0, vmax=1)
 
             D_curr,G_curr = init_models(opt)
 
@@ -292,10 +296,10 @@ def train_paint(opt,Gs,Zs,reals,NoiseAmp,centers,paint_inject_scale):
             Zs[scale_num] = z_curr
             NoiseAmp[scale_num] = opt.noise_amp
 
-            torch.save(Zs, '%s/Zs.pth' % (opt.out_))
-            torch.save(Gs, '%s/Gs.pth' % (opt.out_))
-            torch.save(reals, '%s/reals.pth' % (opt.out_))
-            torch.save(NoiseAmp, '%s/NoiseAmp.pth' % (opt.out_))
+            torch.save(Zs, os.path.join(opt.out_,"Zs.pth"))
+            torch.save(Gs, os.path.join(opt.out_,"Gs.pth"))
+            torch.save(reals, os.path.join(opt.out_,"reals.pth"))
+            torch.save(NoiseAmp, os.path.join(opt.out_,"NoiseAmp.pth"))
 
             scale_num+=1
             nfc_prev = opt.nfc

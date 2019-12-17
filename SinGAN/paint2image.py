@@ -1,16 +1,17 @@
-from config import get_arguments
-from SinGAN.manipulate import *
-from SinGAN.training import *
-from SinGAN.imresize import imresize
-from SinGAN.imresize import imresize_to_shape
-import SinGAN.functions as functions
+from os import path
+from .config import get_arguments
+from .SinGAN.manipulate import *
+from .SinGAN.training import *
+from .SinGAN.imresize import imresize
+from .SinGAN.imresize import imresize_to_shape
+from .SinGAN import functions
 
 
 if __name__ == '__main__':
     parser = get_arguments()
-    parser.add_argument('--input_dir', help='input image dir', default='Input/Images')
+    parser.add_argument('--input_dir', help='input image dir', default='Input\\Images')
     parser.add_argument('--input_name', help='training image name', required=True)
-    parser.add_argument('--ref_dir', help='input reference dir', default='Input/Paint')
+    parser.add_argument('--ref_dir', help='input reference dir', default='Input\\Paint')
     parser.add_argument('--ref_name', help='reference image name', required=True)
     parser.add_argument('--paint_start_scale', help='paint injection scale', type=int, required=True)
     parser.add_argument('--quantization_flag', help='specify if to perform color quantization training', type=bool, default=False)
@@ -37,7 +38,7 @@ if __name__ == '__main__':
         if (opt.paint_start_scale < 1) | (opt.paint_start_scale > (len(Gs)-1)):
             print("injection scale should be between 1 and %d" % (len(Gs)-1))
         else:
-            ref = functions.read_image_dir('%s/%s' % (opt.ref_dir, opt.ref_name), opt)
+            ref = functions.read_image_dir(path.join(opt.ref_dir, opt.ref_name), opt)
             if ref.shape[3] != real.shape[3]:
                 ref = imresize_to_shape(ref, [real.shape[2], real.shape[3]], opt)
                 ref = ref[:, :, :real.shape[2], :real.shape[3]]
@@ -56,14 +57,14 @@ if __name__ == '__main__':
                 real_s = imresize(real, pow(opt.scale_factor, (N - n)), opt)
                 real_s = real_s[:, :, :reals[n].shape[2], :reals[n].shape[3]]
                 real_quant, centers = functions.quant(real_s, opt.device)
-                plt.imsave('%s/real_quant.png' % dir2save, functions.convert_image_np(real_quant), vmin=0, vmax=1)
-                plt.imsave('%s/in_paint.png' % dir2save, functions.convert_image_np(in_s), vmin=0, vmax=1)
+                plt.imsave(path.join(dir2save,"real_quant.png"), functions.convert_image_np(real_quant), vmin=0, vmax=1)
+                plt.imsave(path.join(dir2save,"in_paint.png"), functions.convert_image_np(in_s), vmin=0, vmax=1)
                 in_s = functions.quant2centers(ref, centers)
                 in_s = imresize(in_s, pow(opt.scale_factor, (N - n)), opt)
                 # in_s = in_s[:, :, :reals[n - 1].shape[2], :reals[n - 1].shape[3]]
                 # in_s = imresize(in_s, 1 / opt.scale_factor, opt)
                 in_s = in_s[:, :, :reals[n].shape[2], :reals[n].shape[3]]
-                plt.imsave('%s/in_paint_quant.png' % dir2save, functions.convert_image_np(in_s), vmin=0, vmax=1)
+                plt.imsave(path.join(dir2save,"in_paint_quant.png"), functions.convert_image_np(in_s), vmin=0, vmax=1)
                 if (os.path.exists(dir2trained_model)):
                     # print('Trained model does not exist, training SinGAN for SR')
                     Gs, Zs, reals, NoiseAmp = functions.load_trained_pyramid(opt)
@@ -72,7 +73,7 @@ if __name__ == '__main__':
                     train_paint(opt, Gs, Zs, reals, NoiseAmp, centers, opt.paint_start_scale)
                     opt.mode = 'paint2image'
             out = SinGAN_generate(Gs[n:], Zs[n:], reals, NoiseAmp[n:], opt, in_s, n=n, num_samples=1)
-            plt.imsave('%s/start_scale=%d.png' % (dir2save, opt.paint_start_scale), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
+            plt.imsave(path.join(dir2save,"start_scale={}.png".format(opt.paint_start_scale)), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
 
 
 

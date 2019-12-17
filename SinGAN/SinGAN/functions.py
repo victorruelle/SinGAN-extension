@@ -7,13 +7,16 @@ import scipy.io as sio
 import math
 from skimage import io as img
 from skimage import color, morphology, filters
-#from skimage import morphology
+#from skimage import morphology 
 #from skimage import filters
-from SinGAN.imresize import imresize
+from .imresize import imresize
 import os
+from os import path
 import random
 from sklearn.cluster import KMeans
 
+from ExperimentManager import getManager
+manager = getManager()
 
 # custom weights initialization called on netG and netD
 
@@ -147,7 +150,7 @@ def calc_gradient_penalty(netD, real_data, fake_data, LAMBDA, device):
     return gradient_penalty
 
 def read_image(opt):
-    x = img.imread('%s/%s' % (opt.input_dir,opt.input_name))
+    x = img.imread(path.join(opt.input_dir,opt.input_name))
     x = np2torch(x,opt)
     x = x[:,0:3,:,:]
     return x
@@ -183,14 +186,14 @@ def torch2uint8(x):
     return x
 
 def read_image2np(opt):
-    x = img.imread('%s/%s' % (opt.input_dir,opt.input_name))
+    x = img.imread(path.join(opt.input_dir,opt.input_name))
     x = x[:, :, 0:3]
     return x
 
 def save_networks(netG,netD,z,opt):
-    torch.save(netG.state_dict(), '%s/netG.pth' % (opt.outf))
-    torch.save(netD.state_dict(), '%s/netD.pth' % (opt.outf))
-    torch.save(z, '%s/z_opt.pth' % (opt.outf))
+    torch.save(netG.state_dict(), path.join(opt.outf,'netG.pth'))
+    torch.save(netD.state_dict(), path.join(opt.outf,'netD.pth'))
+    torch.save(z, path.join(opt.outf,'z_opt.pth'))
 
 def adjust_scales2image(real_,opt):
     #opt.num_scales = int((math.log(math.pow(opt.min_size / (real_.shape[2]), 1), opt.scale_factor_init))) + 1
@@ -228,17 +231,16 @@ def creat_reals_pyramid(real,reals,opt):
 
 
 def load_trained_pyramid(opt, mode_='train'):
-    #dir = 'TrainedModels/%s/scale_factor=%f' % (opt.input_name[:-4], opt.scale_factor_init)
     mode = opt.mode
     opt.mode = 'train'
     if (mode == 'animation_train') | (mode == 'SR_train') | (mode == 'paint_train'):
         opt.mode = mode
     dir = generate_dir2save(opt)
     if(os.path.exists(dir)):
-        Gs = torch.load('%s/Gs.pth' % dir)
-        Zs = torch.load('%s/Zs.pth' % dir)
-        reals = torch.load('%s/reals.pth' % dir)
-        NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir)
+        Gs = torch.load(path.join(dir,'Gs.pth'))
+        Zs = torch.load(path.join(dir,'Zs.pth'))
+        reals = torch.load(path.join(dir,'reals.pth'))
+        NoiseAmp = torch.load(path.join(dir,'NoiseAmp.pth'))
     else:
         print('no appropriate trained model is exist, please train first')
     opt.mode = mode
@@ -256,28 +258,28 @@ def generate_in2coarsest(reals,scale_v,scale_h,opt):
 def generate_dir2save(opt):
     dir2save = None
     if (opt.mode == 'train') | (opt.mode == 'SR_train'):
-        dir2save = 'TrainedModels/%s/scale_factor=%f,alpha=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.alpha)
+        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={},alpha={}'.format(opt.scale_factor_init,opt.alpha))
     elif (opt.mode == 'animation_train') :
-        dir2save = 'TrainedModels/%s/scale_factor=%f_noise_padding' % (opt.input_name[:-4], opt.scale_factor_init)
+        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={}_noise_padding'.format(opt.scale_factor_init))
     elif (opt.mode == 'paint_train') :
-        dir2save = 'TrainedModels/%s/scale_factor=%f_paint/start_scale=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.paint_start_scale)
+        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={}_paint'.format(opt.scale_factor_init),"start_scale={}".format(opt.paint_start_scale))
     elif opt.mode == 'random_samples':
-        dir2save = '%s/RandomSamples/%s/gen_start_scale=%d' % (opt.out,opt.input_name[:-4], opt.gen_start_scale)
+        dir2save = path.join(opt.out,"RandomSamples",opt.input_name[:-4], 'gen_start_scale={}'.format(opt.gen_start_scale))
     elif opt.mode == 'random_samples_arbitrary_sizes':
-        dir2save = '%s/RandomSamples_ArbitrerySizes/%s/scale_v=%f_scale_h=%f' % (opt.out,opt.input_name[:-4], opt.scale_v, opt.scale_h)
+        dir2save = path.join(opt.out,"RandomSamples_ArbitrerySizes",opt.input_name[:-4], 'scale_v={}_scale_h={}'.format(opt.scale_v,opt.scale_h))
     elif opt.mode == 'animation':
-        dir2save = '%s/Animation/%s' % (opt.out, opt.input_name[:-4])
+        dir2save = path.join(opt.out,"Animation",opt.input_name[:-4])
     elif opt.mode == 'SR':
-        dir2save = '%s/SR/%s' % (opt.out, opt.sr_factor)
+        dir2save = path.join(opt.out,"SR","{}".format(opt.sr_factor))
     elif opt.mode == 'harmonization':
-        dir2save = '%s/Harmonization/%s/%s_out' % (opt.out, opt.input_name[:-4],opt.ref_name[:-4])
+        dir2save = path.join(opt.out,"Harmonization",opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
     elif opt.mode == 'editing':
-        dir2save = '%s/Editing/%s/%s_out' % (opt.out, opt.input_name[:-4],opt.ref_name[:-4])
+        dir2save = path.join(opt.out,"Editing", opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
     elif opt.mode == 'paint2image':
-        dir2save = '%s/Paint2image/%s/%s_out' % (opt.out, opt.input_name[:-4],opt.ref_name[:-4])
+        dir2save = path.join(opt.out,"Paint2image", opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
         if opt.quantization_flag:
             dir2save = '%s_quantized' % dir2save
-    return dir2save
+    return os.path.join(manager.experiment_dir,dir2save)
 
 def post_config(opt):
     # init fixed parameters
@@ -287,7 +289,7 @@ def post_config(opt):
     opt.nfc_init = opt.nfc
     opt.min_nfc_init = opt.min_nfc
     opt.scale_factor_init = opt.scale_factor
-    opt.out_ = 'TrainedModels/%s/scale_factor=%f/' % (opt.input_name[:-4], opt.scale_factor)
+    opt.out_ = path.join(manager.experiment_dir,'TrainedModels',opt.input_name[:-4],'scale_factor={}'.format(opt.scale_factor))
     if opt.mode == 'SR':
         opt.alpha = 100
 
@@ -298,6 +300,7 @@ def post_config(opt):
     torch.manual_seed(opt.manualSeed)
     if torch.cuda.is_available() and opt.not_cuda:
         print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+
     return opt
 
 def calc_init_scale(opt):
@@ -349,7 +352,7 @@ def dilate_mask(mask,opt):
     mask = np2torch(mask,opt)
     opt.nc_im = nc_im
     mask = mask.expand(1, 3, mask.shape[2], mask.shape[3])
-    plt.imsave('%s/%s_mask_dilated.png' % (opt.ref_dir, opt.ref_name[:-4]), convert_image_np(mask), vmin=0,vmax=1)
+    plt.imsave(path.join(opt.ref_dir, '{}_mask_dilated.png'.format(opt.ref_name[:-4])), convert_image_np(mask), vmin=0,vmax=1)
     mask = (mask-mask.min())/(mask.max()-mask.min())
     return mask
 

@@ -1,11 +1,14 @@
 {   
-    "name" : "experiment 1",
+    "name" : "Testing standard training",
     "experiments_dir" : "experiments",
     "skip_dirs" : [],
     "verbose" : 1,
     "ghost" : false,
     "tensorboard":true,
-
+    "tasks_to_run":["test_standard_train"],
     "config" : {
+
+        "input_dir" : "SinGAN\\Input\\Images",
+        "input_image_name" : "birds.png"
     }
 }

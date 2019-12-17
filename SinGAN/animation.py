@@ -1,8 +1,8 @@
-from config import get_arguments
-from SinGAN.manipulate import *
-from SinGAN.training import *
-from SinGAN.imresize import imresize
-import SinGAN.functions as functions
+from .config import get_arguments
+from .SinGAN.manipulate import *
+from .SinGAN.training import *
+from .SinGAN.imresize import imresize
+from SinGAN import functions
 
 
 if __name__ == '__main__':
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     #parser.add_argument('--animation_start_scale', type=int, help='generation start scale', default=2)
     parser.add_argument('--alpha_animation', type=float, help='animation random walk first moment', default=0.1)
     #parser.add_argument('--beta_animation', type=float, help='animation random walk second moment', default=0.9)
-    parser.add_argument('--input_dir', help='input image dir', default='Input/Images')
+    parser.add_argument('--input_dir', help='input image dir', default='Input\\Images')
     parser.add_argument('--input_name', help='input image name', required=True)
     parser.add_argument('--mode', help='task to be done', default='animation')
     opt = parser.parse_args()

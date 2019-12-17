@@ -1,13 +1,13 @@
-from config import get_arguments
-from SinGAN.manipulate import *
-from SinGAN.training import *
-from SinGAN.imresize import imresize
-import SinGAN.functions as functions
+from .config import get_arguments
+from .SinGAN.manipulate import *
+from .SinGAN.training import *
+from .SinGAN.imresize import imresize
+from .SinGAN import functions
 
 
 if __name__ == '__main__':
     parser = get_arguments()
-    parser.add_argument('--input_dir', help='input image dir', default='Input/Images')
+    parser.add_argument('--input_dir', help='input image dir', default='Input\\Images')
     parser.add_argument('--input_name', help='training image name', default="33039_LR.png")#required=True)
     parser.add_argument('--sr_factor', help='super resolution factor', type=float, default=4)
     parser.add_argument('--mode', help='task to be done', default='SR')
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         out = SinGAN_generate(Gs_sr, Zs_sr, reals_sr, NoiseAmp_sr, opt, in_s=reals_sr[0], num_samples=1)
         out = out[:, :, 0:int(opt.sr_factor * reals[-1].shape[2]), 0:int(opt.sr_factor * reals[-1].shape[3])]
         dir2save = functions.generate_dir2save(opt)
-        plt.imsave('%s/%s_HR.png' % (dir2save,opt.input_name[:-4]), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
+        plt.imsave(os.path.join(dir2save,'{}_HR.png'.format(opt.input_name[:-4])), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
 
 
 
