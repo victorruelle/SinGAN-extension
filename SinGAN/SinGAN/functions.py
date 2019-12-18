@@ -281,7 +281,16 @@ def generate_dir2save(opt):
             dir2save = '%s_quantized' % dir2save
     return os.path.join(manager.experiment_dir,dir2save)
 
-def post_config(opt):
+
+@manager.capture
+def post_config(opt,workspace = None,network = None,pyramid = None,optimization = None):
+
+    # override with parameters from config
+    for param_group in [workspace,network,pyramid,optimization]:
+        if param_group is not None:
+            for arg,value in param_group.items():
+                setattr(opt,arg,value)
+
     # init fixed parameters
     opt.device = torch.device("cpu" if opt.not_cuda else "cuda:0")
     opt.niter_init = opt.niter

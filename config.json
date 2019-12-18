@@ -6,9 +6,50 @@
     "ghost" : false,
     "tensorboard":true,
     "tasks_to_run":["test_standard_train"],
-    "config" : {
 
-        "input_dir" : "SinGAN\\Input\\Images",
-        "input_image_name" : "birds.png"
+    "config" : {
+        "input_dir" : "SinGAN/Input/Images",
+        "input_image_name" : "birds.png",
+        "workspace":
+        {
+            "not_cuda":false,
+            "netG":"",
+            "netD":"",
+            "manualSeed":1,
+            "nc_z":3,
+            "nc_im":3,
+            "out":"Output"
+        },
+
+        "network":
+        {
+            "nfc":32,
+            "min-nfc":32,
+            "ker_size":3,
+            "num_layer":3,
+            "stride":1,
+            "padd_size":0
+        },
+
+        "pyramid":
+        {
+            "scale_factor":0.75,
+            "noise_amp":0.1,
+            "min_size":160,
+            "max_size":250
+        },
+
+        "optimization":
+        {
+            "niter":10,
+            "gamma":0.1,
+            "lr_g":0.0005,
+            "lr_d":0.0005,
+            "beta1":0.5,
+            "Gsteps":3,
+            "Dsteps":3,
+            "lambda_grad":0.1,
+            "alpha":10
+        }
     }
 }
