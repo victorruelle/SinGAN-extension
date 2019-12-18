@@ -13,6 +13,18 @@ $$
 
 In the config file, $\textit{coarsest size}$ is defined as $\textit{min\_size}$ and the with and height are defined by the chosen input image. Hence, the only way to modify $N$ is to modify $\textit{min\_size}$. If $\textit{min\_size} = min(\textit{original width, height})$, there will only be one scale. Reducing $\textit{min\_size}$ will increase the number of scales.
 
+
+## Code changes to make
+
+### Saving 
+
+Put all saves within the current run folders.
+Delete dir2save function.
+
+### Model retraining
+
+Change the retraining mechanic : specify any given path. Right now, it looks at the one generated with dir2save.
+
 # SinGAN
 [Project](http://webee.technion.ac.il/people/tomermic/SinGAN/SinGAN.htm) | [Arxiv](https://arxiv.org/pdf/1905.01164.pdf) | [CVF](http://openaccess.thecvf.com/content_ICCV_2019/papers/Shaham_SinGAN_Learning_a_Generative_Model_From_a_Single_Natural_Image_ICCV_2019_paper.pdf) 
 ### Official pytorch implementation of the paper: "SinGAN: Learning a Generative Model from a Single Natural Image"

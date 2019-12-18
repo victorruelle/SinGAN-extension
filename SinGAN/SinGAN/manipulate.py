@@ -1,4 +1,8 @@
 from __future__ import print_function
+
+from ExperimentManager import getManager
+manager = getManager()
+
 from . import functions
 from . import models
 import argparse
@@ -78,12 +82,7 @@ def generate_gif(Gs,Zs,reals,NoiseAmp,opt,alpha=0.1,beta=0.9,start_scale=2,fps=1
 
             images_cur.append(I_curr)
         count += 1
-    dir2save = functions.generate_dir2save(opt)
-    try:
-        os.makedirs(os.path.join(dir2save,'start_scale={}'.format(start_scale)))
-    except OSError:
-        pass
-    imageio.mimsave(os.path.join(dir2save,'start_scale={}'.format(start_scale),'alpha={}_beta={}.gif'.format(alpha,beta)),images_cur,fps=fps)
+    imageio.mimsave(manager.get_save_path('alpha={}_beta={}.gif'.format(alpha,beta)),images_cur,fps=fps)
     del images_cur
 
 def SinGAN_generate(Gs,Zs,reals,NoiseAmp,opt,in_s=None,scale_v=1,scale_h=1,n=0,gen_start_scale=0,num_samples=50):
@@ -132,10 +131,7 @@ def SinGAN_generate(Gs,Zs,reals,NoiseAmp,opt,in_s=None,scale_v=1,scale_h=1,n=0,g
             I_curr = G(z_in.detach(),I_prev)
 
             if n == len(reals)-1:
-                if opt.mode == 'train':
-                    dir2save = os.path.join(opt.out,"RandomSamples",opt.input_name[:-4],"gen_start_scale={}".format(gen_start_scale))
-                else:
-                    dir2save = functions.generate_dir2save(opt)
+                dir2save = manager.get_save_path(opt.out)
                 try:
                     os.makedirs(dir2save)
                 except OSError:

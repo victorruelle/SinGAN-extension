@@ -1,3 +1,6 @@
+from ExperimentManager import getManager
+manager = getManager()
+
 from . import functions
 from . import models
 import os
@@ -20,7 +23,7 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
         opt.nfc = min(opt.nfc_init * pow(2, math.floor(scale_num / 4)), 128)
         opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(scale_num / 4)), 128)
 
-        opt.out_ = functions.generate_dir2save(opt)
+        opt.out_ = manager.get_save_path()
         opt.outf = os.path.join(opt.out_,"{}".format(scale_num))
         try:
             os.makedirs(opt.outf)
@@ -272,7 +275,7 @@ def train_paint(opt,Gs,Zs,reals,NoiseAmp,centers,paint_inject_scale):
             opt.nfc = min(opt.nfc_init * pow(2, math.floor(scale_num / 4)), 128)
             opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(scale_num / 4)), 128)
 
-            opt.out_ = functions.generate_dir2save(opt)
+            opt.out_ = manager.get_save_path()
             opt.outf = os.path.join(opt.out_,scale_num)
             try:
                 os.makedirs(opt.outf)

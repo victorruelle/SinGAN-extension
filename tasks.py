@@ -31,18 +31,8 @@ def test_standard_train(input_dir,input_image_name):
     Zs = []
     reals = []
     NoiseAmp = []
-    dir2save = functions.generate_dir2save(opt)
-    print("dir2save :",dir2save)
-
-    if (os.path.exists(dir2save)):
-        print('trained model already exist')
-
-    else:
-        try:
-            os.makedirs(dir2save)
-        except OSError:
-            pass
-        real = functions.read_image(opt)
-        functions.adjust_scales2image(real, opt) # !! we dont recover the output of the function and modifications do not seem to be in-place
-        train(opt, Gs, Zs, reals, NoiseAmp)
-        SinGAN_geneate(Gs,Zs,reals,NoiseAmp,opt)
+    
+    real = functions.read_image(opt)
+    functions.adjust_scales2image(real, opt) # !! we dont recover the output of the function and modifications do not seem to be in-place
+    train(opt, Gs, Zs, reals, NoiseAmp)
+    SinGAN_generate(Gs,Zs,reals,NoiseAmp,opt)

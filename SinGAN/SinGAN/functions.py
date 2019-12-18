@@ -235,7 +235,7 @@ def load_trained_pyramid(opt, mode_='train'):
     opt.mode = 'train'
     if (mode == 'animation_train') | (mode == 'SR_train') | (mode == 'paint_train'):
         opt.mode = mode
-    dir = generate_dir2save(opt)
+    dir = opt.load_path
     if(os.path.exists(dir)):
         Gs = torch.load(path.join(dir,'Gs.pth'))
         Zs = torch.load(path.join(dir,'Zs.pth'))
@@ -254,33 +254,6 @@ def generate_in2coarsest(reals,scale_v,scale_h,opt):
     else: #if n!=0
         in_s = upsampling(real_down, real_down.shape[2], real_down.shape[3])
     return in_s
-
-def generate_dir2save(opt):
-    dir2save = None
-    if (opt.mode == 'train') | (opt.mode == 'SR_train'):
-        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={},alpha={}'.format(opt.scale_factor_init,opt.alpha))
-    elif (opt.mode == 'animation_train') :
-        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={}_noise_padding'.format(opt.scale_factor_init))
-    elif (opt.mode == 'paint_train') :
-        dir2save = path.join('TrainedModels',opt.input_name[:-4], 'scale_factor={}_paint'.format(opt.scale_factor_init),"start_scale={}".format(opt.paint_start_scale))
-    elif opt.mode == 'random_samples':
-        dir2save = path.join(opt.out,"RandomSamples",opt.input_name[:-4], 'gen_start_scale={}'.format(opt.gen_start_scale))
-    elif opt.mode == 'random_samples_arbitrary_sizes':
-        dir2save = path.join(opt.out,"RandomSamples_ArbitrerySizes",opt.input_name[:-4], 'scale_v={}_scale_h={}'.format(opt.scale_v,opt.scale_h))
-    elif opt.mode == 'animation':
-        dir2save = path.join(opt.out,"Animation",opt.input_name[:-4])
-    elif opt.mode == 'SR':
-        dir2save = path.join(opt.out,"SR","{}".format(opt.sr_factor))
-    elif opt.mode == 'harmonization':
-        dir2save = path.join(opt.out,"Harmonization",opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
-    elif opt.mode == 'editing':
-        dir2save = path.join(opt.out,"Editing", opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
-    elif opt.mode == 'paint2image':
-        dir2save = path.join(opt.out,"Paint2image", opt.input_name[:-4],"{}_out".format(opt.ref_name[:-4]))
-        if opt.quantization_flag:
-            dir2save = '%s_quantized' % dir2save
-    return os.path.join(manager.experiment_dir,dir2save)
-
 
 @manager.capture
 def post_config(opt,workspace = None,network = None,pyramid = None,optimization = None):
