@@ -1,5 +1,5 @@
 {   
-    "name" : "Testing standard training",
+    "name" : "Testing standard with new image",
     "experiments_dir" : "experiments",
     "skip_dirs" : [],
     "verbose" : 1,
@@ -8,8 +8,8 @@
     "tasks_to_run":["test_standard_train"],
 
     "config" : {
-        "input_dir" : "SinGAN/Input/Images",
-        "input_image_name" : "birds.png",
+        "input_dir" : "input_images",
+        "input_image_name" : "sea.png",
         "workspace":
         {
             "not_cuda":false,
@@ -35,13 +35,13 @@
         {
             "scale_factor":0.75,
             "noise_amp":0.1,
-            "min_size":160,
-            "max_size":250
+            "min_size":100,
+            "max_size":1000
         },
 
         "optimization":
         {
-            "niter":10,
+            "niter":2000,
             "gamma":0.1,
             "lr_g":0.0005,
             "lr_d":0.0005,
