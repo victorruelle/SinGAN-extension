@@ -1,6 +1,21 @@
 # SinGAN-extension
 Experimenting with SinGANs (https://github.com/tamarott/SinGAN) and possible extensions in the context of my final project for the Visual Recognition course of the MVA master class.
 
+## Extension Idea
+
+We will try to upsample patches of a low resolution image that correspond to the patch of a given high resolution image. For instance : we have a high-res image of charlotte's face and many low res images where she appears. We will try to increase the resolution of those low res faces and compare the result with the one obtained using a regular SR training.
+
+Can we extend this by using multiple training images? All that is needed is to provide more true labels to the disciminators.
+
+### Steps
+
+1. Select 10 images of Charlotte's head and downsize them to a max(height,width) of 200. Use images that have different lighting, poses, glasses or not etc.
+2. Split them in 5 training images and 5 testing images.
+3. For each training image, train a fixed pyramid of generators and discriminators and apply the SR testing to each of the 5 testing images.
+4. For each testing image, traing with the same parameters and apply classic SR
+5. Compare, for each training image, the upsampled image obtained from training with each of the training images and the actual testing image.
+
+
 ## How to tune experiments
 
 ### Changing the number of scales
@@ -15,6 +30,10 @@ In the config file, $\textit{coarsest size}$ is defined as $\textit{min\_size}$ 
 
 
 ## Code changes to make
+
+### Printing
+
+Change the printing of scale progress to a progress bar.
 
 ### Saving 
 

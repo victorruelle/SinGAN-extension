@@ -2,12 +2,7 @@ from ExperimentManager import getManagerFromConfig
 manager = getManagerFromConfig("config.json")
 
 
-@manager.capture
-def test(input_dir,*args,**kwargs):
-    print(input_dir)
-    print(args)
-    print(kwargs)
-
-test()
-print(manager.config)
-print(test.__dict__)
+def show_ops(ops):
+    for k,v in ops.__dict__.items():
+        if not "__" in k:
+            print("{}:{}".format(k,str(v)))
