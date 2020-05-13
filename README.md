@@ -9,7 +9,7 @@ Can we extend this by using multiple training images? All that is needed is to p
 
 ### Steps
 
-1. Select 10 images of Charlotte's head and downsize them to a max(height,width) of 200. Use images that have different lighting, poses, glasses or not etc.
+1. Select 10 images and downsize them to a max(height,width) of 200. Use images that have different lighting, poses, glasses or not etc.
 2. Split them in 5 training images and 5 testing images.
 3. For each training image, train a fixed pyramid of generators and discriminators and apply the SR testing to each of the 5 testing images.
 4. For each testing image, traing with the same parameters and apply classic SR
@@ -63,7 +63,7 @@ This is done by injecting an image to the already trained model. See section 4 i
 
 
 ### Citation
-If you use this code for your research, please cite our paper:
+If you use this code for your research, please cite the original paper:
 
 ```
 @inproceedings{rottshaham2019singan,
